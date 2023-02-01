@@ -37,13 +37,18 @@ import os
 import ament_index_python.packages
 import launch
 import launch_ros.actions
-
+from launch.substitutions import LaunchConfiguration
+from launch.launch_description_sources import PythonLaunchDescriptionSource
+from ament_index_python.packages import get_package_share_directory
+from launch.actions import IncludeLaunchDescription
 
 def generate_launch_description():
     config_directory = os.path.join(
         ament_index_python.packages.get_package_share_directory('ublox_gps'),
         'config')
     params = os.path.join(config_directory, 'zed_f9p_rover.yaml')
+
+    ntrip_client_pkg = get_package_share_directory('ntrip_client')
 
     ld = launch.LaunchDescription()
     ublox_rover_node = launch_ros.actions.Node(package='ublox_gps',
@@ -53,13 +58,20 @@ def generate_launch_description():
                                                 output='screen',
                                                 parameters=[params])
 
-    ublox_mbase_node = launch_ros.actions.Node(package='ublox_gps',
-                                                namespace='',
-                                                name='ublox_mbase',
-                                                executable='ublox_gps_node',
-                                                output='screen',
-                                                parameters=[params])
+    # ublox_mbase_node = launch_ros.actions.Node(package='ublox_gps',
+    #                                             namespace='',
+    #                                             name='ublox_mbase',
+    #                                             executable='ublox_gps_node',
+    #                                             output='screen',
+    #                                             parameters=[params])
+
+ 
+    
+    ld.add_action(IncludeLaunchDescription(PythonLaunchDescriptionSource(
+            os.path.join(ntrip_client_pkg, 'ntrip_client_launch.py')),
+        )
+    )
                                              
     ld.add_action(ublox_rover_node)
-    ld.add_action(ublox_mbase_node)
+    # ld.add_action(ublox_mbase_node)
     return ld
