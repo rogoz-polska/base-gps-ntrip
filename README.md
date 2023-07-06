@@ -1,2 +1,2 @@
-# agrorob_gps
-All gps packages of AgroRob
+# ublox_gps
+All gps packages of base station
